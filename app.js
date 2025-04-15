@@ -9,10 +9,7 @@ const bookRoutes=require("./routes/BookRoutes");
 const requestRouter=require("./routes/Request")
 const mapRoutes=require("./routes/Map.routes");
 app.use(express.json());
-app.use(cors({
-    origin: 'https://rgtcxhg8-5173.inc1.devtunnels.ms',
-    credentials: true
-  }));
+app.use(cors());
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}))
 app.use("/user",userRoutes);
