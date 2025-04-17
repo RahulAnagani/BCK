@@ -6,7 +6,7 @@ const SwapRequestSchema = new mongoose.Schema({
   toBook: { type: mongoose.Schema.Types.ObjectId, ref: "Book", required: true },
   status: {
     type: String,
-    enum: ["pending", "accepted", "declined"],
+    enum: ["pending", "accepted", "declined","received"],
     default: "pending"
   },
   createdAt: {
