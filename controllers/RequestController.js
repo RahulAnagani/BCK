@@ -77,14 +77,24 @@ module.exports.makeSwapRequest=async(req,res)=>{
                   if (alreadyRequested) {
                     return res.status(400).json({ success: false, msg: "Request already sent." });
                   }
+                  const reverseREquest=await reqModel.findOne({
+                    fromUser:ammeVaadu._id,
+                    toUser:koneVaadu,
+                    toBook:fromBook,
+                    fromBook:toBook
+                  });
                 const request=new reqModel({
                     fromUser:koneVaadu,
                     toUser:ammeVaadu._id,
                     fromBook:fromBook,
                     toBook:toBook,
-                    status:"pending",
+                    status: reverseREquest ? "accepted" : "pending",
                     type:"Swap"
                 });
+                if(reverseREquest){
+                    reverseREquest.status="accepted",
+                    await reverseREquest.save();
+                }
                 const savedreq=await request.save();
                 if(savedreq){
                     return res.status(200).json({success:true,req:savedreq});
