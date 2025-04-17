@@ -249,7 +249,6 @@ module.exports.cancelRequest = async (req, res) => {
         .populate("toBook")
         .populate("fromUser", "username")
         .sort({ createdAt: -1 });
-  
       return res.status(200).json({ success: true, req: requests });
     } catch (e) {
       console.log(e);

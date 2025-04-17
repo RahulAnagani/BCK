@@ -1,7 +1,7 @@
 const { validationResult } = require("express-validator");
 const bookModel=require("../models/Book");
 const userModel=require("../models/UserModel");
-const Book = require("../models/Book");
+const requestModel=require("../models/Requests");
 const mapController=require("./Map.controller")
 module.exports.addBook=async(req,res)=>{
     const errors=validationResult(req);
@@ -92,9 +92,10 @@ module.exports.checkAvailability=async(req,res)=>{
         try{
             const {okey}=req.query;
             const q="/works/"+okey;
-            console.log(q);
             const exact=await bookModel.find({key:q}).populate("owner");
+            const existing=await requestModel.find({toUser:req.user._id}).populate("fromBook").populate("fromUser","username").populate("toBook");
             const availability=[];
+            const existingRequests=[];
             if(exact){
                 for (const e of exact) {
                   if (e.isAvailable) {
@@ -110,7 +111,19 @@ module.exports.checkAvailability=async(req,res)=>{
                     });
                   }
                 }
-                return res.status(200).json({ success: true, availability });
+                for(const e of existing){
+                    if(e.fromBook.key===q&&e.status!=='declined'){
+                        existingRequests.push(
+                            {
+                                username:e.fromUser.username,
+                                requestType:e.type,
+                                toBook:e.toBook,
+                                fromBook:e.fromBook,
+                            }
+                        )
+                    }
+                }
+                return res.status(200).json({ success: true, availability:availability,existing:existingRequests});
             }
             else{
                 return res.status(200).json({success:true,availability:availability});
