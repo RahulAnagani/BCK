@@ -112,18 +112,11 @@ module.exports.checkAvailability=async(req,res)=>{
                   }
                 }
                 for(const e of existing){
-                    if(e.fromBook.key===q&&e.status!=='declined'){
-                        existingRequests.push(
-                            {
-                                username:e.fromUser.username,
-                                requestType:e.type,
-                                toBook:e.toBook,
-                                fromBook:e.fromBook,
-                            }
-                        )
+                    if(e.fromBook&&e.fromBook.key===q){
+                        existingRequests.push(e);
                     }
                 }
-                return res.status(200).json({ success: true, availability:availability,existing:existingRequests});
+                return res.status(200).json({ success: true, availability:availability,existingRequests:existingRequests});
             }
             else{
                 return res.status(200).json({success:true,availability:availability});
