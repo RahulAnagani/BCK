@@ -18,6 +18,7 @@ module.exports.initializeServer = (server) => {
       const { userId } = data;
       if (!userId) return;
       onlineUsers.set(userId, socket.id);
+      console.log("hi")
       try {
         await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
         socket.userId = userId; 
@@ -27,26 +28,35 @@ module.exports.initializeServer = (server) => {
     });
 
     socket.on("send-message", async (data) => {
-      const { senderId, receiverId, content } = data;
-      if (!senderId || !receiverId || !content.trim()) return;
-
+      const { senderId, receiverUsername, content } = data;
+      if (!senderId || !receiverUsername || !content.trim()) return;
+    
       try {
+        const sender = await userModel.findById(senderId);
+        const receiver = await userModel.findOne({ username: receiverUsername });
+        if (!sender || !receiver) return;
+    
         const message = new messageModel({
           sender: senderId,
-          receiver: receiverId,
+          receiver: receiver._id,
           content,
           read: false
         });
         await message.save();
-
-        const receiverSocketId = onlineUsers.get(receiverId);
+    
+        const receiverSocketId = onlineUsers.get(receiver._id.toString());
         if (receiverSocketId) {
-          io.to(receiverSocketId).emit("new-message", { senderId, content });
+          io.to(receiverSocketId).emit("new-message", {
+            senderId,
+            senderUserName: sender.username,
+            content
+          });
         }
       } catch (e) {
         console.log(e);
       }
     });
+    
 
     socket.on("typing", (data) => {
         const { senderId, receiverId } = data;
