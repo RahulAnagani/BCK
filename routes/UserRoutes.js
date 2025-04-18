@@ -1,5 +1,5 @@
 const express=require("express");
-const { body } = require("express-validator");
+const { body, query } = require("express-validator");
 const userController=require("../controllers/User.controller");
 const { validateUser } = require("../middlewares/AAth");
 const router=express.Router();
@@ -9,4 +9,5 @@ router.post("/verifyOtp",[body("email").trim().isEmail(),body("otp").trim().isLe
 // router.post("/logout",validateUser,userController);
 router.get("/getProfile",validateUser,userController.getMyProfile);
 router.get("/ValidateToken",validateUser,userController.ValidateToken);
+router.get("/search",[validateUser,query("username").notEmpty()],userController.search)
 module.exports=router;

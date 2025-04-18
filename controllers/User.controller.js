@@ -142,3 +142,26 @@ module.exports.ValidateToken=async(req,res)=>{
 module.exports.logout=async(req,res)=>{
 
 }
+
+
+module.exports.search = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "Invalid username query.", errors: errors.array() });
+    }
+  
+    const { username } = req.query;
+  
+    try {
+      const users = await UserModel.find({
+        username: { $regex: username, $options: "i" },
+      }).select("_id username");
+  
+      return res.status(200).json({ success: true, users });
+    } catch (e) {
+      console.error("Search error:", e);
+      return res.status(500).json({ success: false, msg: "Internal Server Error" });
+    }
+  };
